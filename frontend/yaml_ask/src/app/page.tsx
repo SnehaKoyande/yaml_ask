@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Head from 'next/head'
-import UploadBox from './components/UploadBox'
+import UploadBox from './components/FileUploader'
 
 export default function Home() {
   const [fileName, setFileName] = useState("")
