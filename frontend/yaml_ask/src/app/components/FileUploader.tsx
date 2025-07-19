@@ -1,19 +1,40 @@
-import { useState } from 'react';
+import { useState } from "react";
 
-export default function FileUploader({ onUpload }: { onUpload: (file: File) => void }) {
-  const [fileName, setFileName] = useState<string | null>(null);
+export default function FileUploader({ onUpload }: { onUpload: (parsed: any) => void }) {
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) setFile(e.target.files[0]);
+  };
+
+  const handleUpload = async () => {
     if (!file) return;
-    setFileName(file.name);
-    onUpload(file);
+    setUploading(true);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const data = await res.json();
+    onUpload(data);
+    setUploading(false);
   };
 
   return (
-    <div className="p-4 border border-dashed border-gray-400 rounded-md w-full max-w-md mx-auto text-violet-950">
-      <input type="file" accept=".yaml,.yml,.tf,.json,.dockerfile" onChange={handleChange} />
-      {fileName && <p className="mt-2 text-sm text-embrald-700">Uploaded: {fileName}</p>}
+    <div className=" p-4 rounded-xl bg-white shadow text-gray-700">
+      <input type="file" onChange={handleFileChange} accept=".yaml,.yml,.tf,.json" />
+      <button
+        onClick={handleUpload}
+        disabled={uploading}
+        className="px-4 py-2 bg-purple-400 text-white rounded-md"
+      >
+        {uploading ? "Uploading..." : "Upload & Parse"}
+      </button>
     </div>
   );
 }

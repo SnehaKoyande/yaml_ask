@@ -4,30 +4,19 @@ import { useState } from 'react'
 import FileUploader from './components/FileUploader'
 
 export default function Home() {
-  const [response, setResponse] = useState<any>(null);
-
-  const handleUpload = async (file: File) => {
-    const formData = new FormData();
-    formData.append("file", file);
-
-    const res = await fetch("http://localhost:8000/upload/", {
-      method: "POST",
-      body: formData,
-    });
-
-    const data = await res.json();
-    setResponse(data);
-  };
+  const [parsed, setParsed] = useState<any>(null);
 
   return (
-    <div className="min-h-screen p-6 bg-violet-100">
-      <h1 className="text-2xl font-bold mb-4 text-center text-violet-950">Yaml Ask</h1>
-      <FileUploader onUpload={handleUpload} />
-      {response && (
-        <pre className="mt-6 p-4 bg-stone-800 rounded-md shadow">
-          {JSON.stringify(response, null, 2)}
-        </pre>
-      )}
+    <div className="min-h-screen min-w-screen bg-gray-100">
+      <div className="max-w-2xl mx-auto py-10 space-y-6 bg-gray">
+        <h1 className="text-2xl font-bold text-purple-900 text-center">InfraBuddy: Upload Infra File</h1>
+        <FileUploader onUpload={setParsed} />
+        {parsed && (
+          <pre className="bg-gray-100 p-4 rounded-md text-sm overflow-x-auto">
+            {JSON.stringify(parsed, null, 2)}
+          </pre>
+        )}
+      </div>
     </div>
   );
 }
