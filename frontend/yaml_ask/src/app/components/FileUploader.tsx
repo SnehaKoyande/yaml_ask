@@ -11,9 +11,9 @@ export default function FileUploader({ onUpload }: { onUpload: (file: File) => v
   };
 
   return (
-    <div className="p-4 border border-dashed border-gray-400 rounded-md w-full max-w-md mx-auto">
+    <div className="p-4 border border-dashed border-gray-400 rounded-md w-full max-w-md mx-auto text-violet-950">
       <input type="file" accept=".yaml,.yml,.tf,.json,.dockerfile" onChange={handleChange} />
-      {fileName && <p className="mt-2 text-sm text-green-700">Uploaded: {fileName}</p>}
+      {fileName && <p className="mt-2 text-sm text-embrald-700">Uploaded: {fileName}</p>}
     </div>
   );
 }
