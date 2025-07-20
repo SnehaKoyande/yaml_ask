@@ -150,3 +150,22 @@ Content-Type: application/json
   "question": "What ACL is used?"
 }
 
+### Analyze config file
+POST http://localhost:8000/analyze/
+Content-Type: application/json
+
+{
+  "filename": "ec2.tf",
+  "config": {
+    "resource": {
+      "aws_instance": {
+        "web": {
+          "ami": "ami-123456",
+          "instance_type": "t2.micro",
+          "associate_public_ip_address": true
+        }
+      }
+    }
+  }
+}
+

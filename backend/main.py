@@ -4,12 +4,13 @@ import hcl2
 from io import StringIO
 import os
 import yaml
-from pydantic import BaseModel
 from utils.flatten import flatten_dict
 from search.chroma_indexer import build_index
 from search.chroma_query import search_config
 from llm.answer_generator import generate_agent_answer
 from llm.memory import clear_memory
+from llm.analyzer import analyze_config
+from models.request_models import AnalyzeRequest, IndexRequest, QueryRequest
 
 def parse_json(content):
     return json.loads(content)
@@ -21,13 +22,6 @@ def parse_yaml(content):
     return yaml.safe_load(content)
 
 app = FastAPI()
-
-class IndexRequest(BaseModel):
-    config: dict
-    filename: str
-
-class QueryRequest(BaseModel):
-    question: str
 
 @app.post("/parse/")
 async def parse_file(file: UploadFile = File(...)):
@@ -80,4 +74,12 @@ async def chat(payload: QueryRequest):
 async def reset():
     clear_memory()
     return {"message": "Memory cleared."}
+
+@app.post("/analyze/")
+async def analyze(payload: AnalyzeRequest):
+    try:
+        result = analyze_config(payload.filename, payload.config)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
