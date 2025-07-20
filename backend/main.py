@@ -4,6 +4,12 @@ import hcl2
 from io import StringIO
 import os
 import yaml
+from pydantic import BaseModel
+from utils.flatten import flatten_dict
+from search.chroma_indexer import build_index
+from search.chroma_query import search_config
+from llm.answer_generator import generate_agent_answer
+from llm.memory import clear_memory
 
 def parse_json(content):
     return json.loads(content)
@@ -15,6 +21,12 @@ def parse_yaml(content):
     return yaml.safe_load(content)
 
 app = FastAPI()
+
+class IndexRequest(BaseModel):
+    config: dict
+
+class QueryRequest(BaseModel):
+    question: str
 
 @app.post("/parse/")
 async def parse_file(file: UploadFile = File(...)):
@@ -34,3 +46,37 @@ async def parse_file(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
     return {"parsed": result}
+
+@app.post("/index/")
+async def index_config(payload: IndexRequest):
+    try:
+        flat = flatten_dict(payload.config)
+        response = build_index(flat)
+        return response
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/query/")
+async def ask_question(payload: QueryRequest):
+    try:
+        results = search_config(payload.question)
+        context = "\n".join(results)
+        answer = generate_agent_answer(context, payload.question)
+        return {"matches": results, "answer": answer}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@app.post("/chat/")
+async def chat(payload: QueryRequest):
+    try:
+        context = "\n".join(search_config(payload.question))
+        answer = generate_agent_answer(context, payload.question)
+        return {"answer": answer}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.post("/reset/")
+async def reset():
+    clear_memory()
+    return {"message": "Memory cleared."}
+

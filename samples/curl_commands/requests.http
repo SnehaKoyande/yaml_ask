@@ -1,0 +1,100 @@
+
+### Index
+POST http://localhost:8000/index/
+Content-Type: application/json
+
+{
+    "config": {
+        "resource": {
+            "aws_instance": {
+                "example": {
+                    "ami": "ami-123456",
+                    "instance_type": "t2.micro",
+                    "tags": {
+                        "Name": "web"
+                    }
+                }
+            }
+        }
+    }
+}
+
+### Query
+POST http://localhost:8000/query/
+Content-Type: application/json
+
+{
+    "question":"what instance type is used?"
+}
+
+### Reset memory before starting a new session
+POST http://localhost:8000/reset/
+Content-Type: application/json
+
+{}
+
+###
+
+### Index a sample config
+POST http://localhost:8000/index/
+Content-Type: application/json
+
+{
+  "config": {
+    "resource": {
+      "aws_instance": {
+        "example": {
+          "ami": "ami-123456",
+          "instance_type": "t2.micro",
+          "tags": {
+            "Name": "web"
+          }
+        }
+      },
+      "aws_s3_bucket": {
+        "bucket1": {
+          "bucket": "my-bucket",
+          "acl": "private"
+        }
+      }
+    }
+  }
+}
+
+###
+
+### Ask a basic question
+POST http://localhost:8000/chat/
+Content-Type: application/json
+
+{
+  "question": "What instance types are being used?"
+}
+
+###
+
+### Ask a follow-up question (uses memory)
+POST http://localhost:8000/chat/
+Content-Type: application/json
+
+{
+  "question": "Is that a cost-effective choice?"
+}
+
+###
+
+### Ask about another part of the config
+POST http://localhost:8000/chat/
+Content-Type: application/json
+
+{
+  "question": "What is the ACL setting for the S3 bucket?"
+}
+
+###
+
+### Clear memory again (optional cleanup)
+POST http://localhost:8000/reset/
+Content-Type: application/json
+
+{}
