@@ -10,7 +10,8 @@ from search.chroma_query import search_config
 from llm.answer_generator import generate_agent_answer
 from llm.memory import clear_memory
 from llm.analyzer import analyze_config
-from models.request_models import AnalyzeRequest, IndexRequest, QueryRequest
+from models.request_models import AnalyzeRequest, IndexRequest, QueryRequest, ChatRequest
+from agent.controller import agent_pipeline
 
 def parse_json(content):
     return json.loads(content)
@@ -62,10 +63,10 @@ async def ask_question(payload: QueryRequest):
         raise HTTPException(status_code=500, detail=str(e))
     
 @app.post("/chat/")
-async def chat(payload: QueryRequest):
+async def chat(payload: ChatRequest):
     try:
         context = "\n".join(search_config(payload.question))
-        answer = generate_agent_answer(context, payload.question)
+        answer = generate_agent_answer(context, payload.question, mode=payload.mode)
         return {"answer": answer}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -80,6 +81,18 @@ async def analyze(payload: AnalyzeRequest):
     try:
         result = analyze_config(payload.filename, payload.config)
         return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@app.post("/agent/")
+async def agent_copilot(req: AnalyzeRequest):
+    try:
+        response = agent_pipeline(
+            question="What can be improved in this config?",
+            filename=req.filename,
+            config=req.config
+        )
+        return {"copilot": response}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

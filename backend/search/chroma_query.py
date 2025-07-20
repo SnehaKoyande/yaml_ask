@@ -4,7 +4,8 @@ from .chroma_indexer import collection
 
 def extract_filename(question: str) -> Optional[str]:
     match = re.search(r'([^\s]+\.(tf|yaml|json))', question, re.IGNORECASE)
-    print(f'{match.group(1)=}')
+    if match:
+        print(f'{match.group(1)=}')
     return match.group(1) if match else None
 
 def search_config(question: str, top_k: int = 5):

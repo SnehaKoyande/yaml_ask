@@ -10,3 +10,6 @@ class QueryRequest(BaseModel):
 class AnalyzeRequest(BaseModel):
     config: dict
     filename: str
+
+class ChatRequest(QueryRequest):
+    mode: str = "chat" # Default mode is chat, can be set to "structured" for structured output

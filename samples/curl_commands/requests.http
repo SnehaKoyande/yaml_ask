@@ -104,13 +104,14 @@ POST http://localhost:8000/index/
 Content-Type: application/json
 
 {
-  "filename": "main9.tf",
+  "filename": "ec2.tf",
   "config": {
     "resource": {
       "aws_instance": {
-        "example": {
-          "ami": "ami9-abc",
-          "instance_type": "t9.micro"
+        "web": {
+          "ami": "ami-123456",
+          "instance_type": "t2.micro",
+          "associate_public_ip_address": true
         }
       }
     }
@@ -168,4 +169,47 @@ Content-Type: application/json
     }
   }
 }
+
+###########
+
+### Ask a structured question
+POST http://localhost:8000/chat/
+Content-Type: application/json
+
+{
+  "question": "Is the EC2 instance in ec2.tf secure?",
+  "mode": "structured"
+}
+
+###
+
+### Fallback: basic answer (no structure)
+POST http://localhost:8000/chat/
+Content-Type: application/json
+
+{
+  "question": "What does this config do?"
+}
+
+############# Call agent to decide tools
+### Full agent pipeline
+POST http://localhost:8000/agent/
+Content-Type: application/json
+
+{
+  "filename": "ec2.tf",
+  "config": {
+    "resource": {
+      "aws_instance": {
+        "web": {
+          "ami": "ami-123456",
+          "instance_type": "t2.micro",
+          "associate_public_ip_address": true
+        }
+      }
+    }
+  }
+}
+
+
 

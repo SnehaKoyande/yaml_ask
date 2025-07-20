@@ -1,4 +1,6 @@
 # yaml_ask
+
+### Phase 1
 A fullstack AI-powered app that lets users upload YAML/Terraform config files and ask questions or get debugging help using LLMs + vector search.
 
 User Question
@@ -10,6 +12,14 @@ LLM (Ollama) generates a context-aware answer
 Agent memory tracks conversation history
      ↓
 LLM performs step-by-step analysis or dialogue
+
+### Phase 2
+User question →
+  Agent decides: do I need to search, analyze, validate?
+    ↓
+  Calls tools in order (with memory)
+    ↓
+  Agent summarizes findings → structured response
 
 
 ## Run command for frontend:

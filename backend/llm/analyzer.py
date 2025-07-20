@@ -16,6 +16,9 @@ Config content:
 {flat}
 """
 
+    print('**** analyze_config ****')
+    print(f'{prompt=}')
+
     response = requests.post(
         "http://localhost:11434/api/generate",
         json={
