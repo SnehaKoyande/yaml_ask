@@ -24,6 +24,7 @@ app = FastAPI()
 
 class IndexRequest(BaseModel):
     config: dict
+    filename: str
 
 class QueryRequest(BaseModel):
     question: str
@@ -51,7 +52,7 @@ async def parse_file(file: UploadFile = File(...)):
 async def index_config(payload: IndexRequest):
     try:
         flat = flatten_dict(payload.config)
-        response = build_index(flat)
+        response = build_index(flat, payload.filename)
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

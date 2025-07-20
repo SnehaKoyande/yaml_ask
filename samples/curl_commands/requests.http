@@ -98,3 +98,55 @@ POST http://localhost:8000/reset/
 Content-Type: application/json
 
 {}
+
+### Upload file 1
+POST http://localhost:8000/index/
+Content-Type: application/json
+
+{
+  "filename": "main9.tf",
+  "config": {
+    "resource": {
+      "aws_instance": {
+        "example": {
+          "ami": "ami9-abc",
+          "instance_type": "t9.micro"
+        }
+      }
+    }
+  }
+}
+
+### Upload file 2
+POST http://localhost:8000/index/
+Content-Type: application/json
+
+{
+  "filename": "s3.tf",
+  "config": {
+    "resource": {
+      "aws_s3_bucket": {
+        "bucket1": {
+          "acl": "public-read"
+        }
+      }
+    }
+  }
+}
+
+### Ask scoped question
+POST http://localhost:8000/chat/
+Content-Type: application/json
+
+{
+  "question": "What is the AMI in main.tf?"
+}
+
+### Ask broad question
+POST http://localhost:8000/chat/
+Content-Type: application/json
+
+{
+  "question": "What ACL is used?"
+}
+

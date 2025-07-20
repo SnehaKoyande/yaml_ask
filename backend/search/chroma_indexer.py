@@ -1,21 +1,20 @@
+from chromadb.utils import embedding_functions
 import chromadb
-from chromadb.utils.embedding_functions import SentenceTransformerEmbeddingFunction
+import uuid
 
 client = chromadb.Client()
-embedder = SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
-collection = client.get_or_create_collection("configs", embedding_function=embedder)
+embedder = embedding_functions.SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
+collection = client.get_or_create_collection(name="configs", embedding_function=embedder)
 
-def build_index(flat_config: dict):
-    # Clear previous entries (optional)
-    # collection.delete()
-
-    texts = [f"{k} = {v}" for k, v in flat_config.items()]
-    ids = [f"item-{i}" for i in range(len(texts))]
+def build_index(flat_config: dict, filename: str):
+    documents = [f"{k} = {v}" for k, v in flat_config.items()]
+    ids = [str(uuid.uuid4()) for _ in documents]
+    metadatas = [{"filename": filename} for _ in documents]
 
     collection.add(
-        documents=texts,
+        documents=documents,
         ids=ids,
-        metadatas=[{"key": k} for k in flat_config.keys()]
+        metadatas=metadatas
     )
 
-    return {"message": "Index built", "chunks_indexed": len(texts)}
+    return {"status": f"Indexed {len(documents)} entries from {filename}"}
