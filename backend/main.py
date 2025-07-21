@@ -1,7 +1,7 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException
 import json
 import hcl2
-from io import StringIO
+from io import BytesIO
 import os
 import yaml
 from utils.flatten import flatten_dict
@@ -14,19 +14,22 @@ from models.request_models import AnalyzeRequest, IndexRequest, QueryRequest, Ch
 from agent.controller import agent_pipeline
 
 def parse_json(content):
-    return json.loads(content)
+    return json.loads(content.decode("utf-8"))
 
 def parse_tf(content):
-    return hcl2.load(StringIO(content.decode()))
+    try:
+        return hcl2.load(BytesIO(content))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"HCL parse failed: {str(e)}")
 
 def parse_yaml(content):
-    return yaml.safe_load(content)
+    return yaml.safe_load(content.decode("utf-8"))
 
 app = FastAPI()
 
 @app.post("/parse/")
 async def parse_file(file: UploadFile = File(...)):
-    ext = os.path.splitext(file.filename)[1]
+    ext = os.path.splitext(file.filename)[1].lower()
 
     content = await file.read()
     try:

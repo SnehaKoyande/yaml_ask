@@ -3,6 +3,7 @@ import { useState } from "react";
 export default function FileUploader({ onUpload }: { onUpload: (parsed: any) => void }) {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [parsed, setParsed] = useState(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) setFile(e.target.files[0]);
@@ -21,6 +22,7 @@ export default function FileUploader({ onUpload }: { onUpload: (parsed: any) => 
     });
 
     const data = await res.json();
+    setParsed(data);
     onUpload(data);
     setUploading(false);
   };

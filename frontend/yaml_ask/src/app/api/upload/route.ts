@@ -3,41 +3,47 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import FormData from "form-data";
-
-// Enable streaming body parsing
-export const config = {
-  api: {
-    bodyParser: false,
-  },
-};
+import { request } from "undici";
 
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
-  const file = formData.get("file");
+  const file = formData.get("file") as File;
 
-  if (!file || typeof file === "string") {
-    return NextResponse.json({ error: "Invalid file" }, { status: 400 });
+  if (!file) {
+    return NextResponse.json({ error: "No file provided" }, { status: 400 });
   }
 
-  // Convert Web File to buffer
+  // ✅ Convert browser File to Buffer
   const buffer = Buffer.from(await file.arrayBuffer());
-  const tempFilePath = path.join(os.tmpdir(), file.name);
-  fs.writeFileSync(tempFilePath, buffer);
 
-  // Build multipart form using Node-compatible form-data
-  const form = new FormData();
-  form.append("file", fs.createReadStream(tempFilePath), {
+  // ✅ Save to temp path
+  const tempPath = path.join(os.tmpdir(), file.name);
+  fs.writeFileSync(tempPath, buffer);
+
+  // ✅ Use FormData lib to send multipart/form-data
+  const forwardForm = new FormData();
+  forwardForm.append("file", fs.createReadStream(tempPath), {
     filename: file.name,
-    contentType: file.type || "application/octet-stream",
+    contentType: file.type || "application/octet-stream"
   });
 
-  // Send to FastAPI
-  const res = await fetch("http://localhost:8000/parse/", {
+  // ✅ Send to FastAPI endpoint (e.g., /parse)
+  const { statusCode, body } = await request("http://localhost:8000/parse/", {
     method: "POST",
-    body: form,
-    headers: form.getHeaders(),
+    body: forwardForm,
+    headers: forwardForm.getHeaders(),
   });
 
-  const data = await res.json();
-  return NextResponse.json(data);
+  const parsed = await streamToJson(body);
+  return NextResponse.json(parsed);
+}
+
+// Helper
+async function streamToJson(stream: NodeJS.ReadableStream): Promise<any> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of stream) {
+    chunks.push(Buffer.from(chunk));
+  }
+  const buffer = Buffer.concat(chunks);
+  return JSON.parse(buffer.toString("utf-8"));
 }
